@@ -1,0 +1,96 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Shop{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-text">
+            <span class="hero-tag">New Season Collection</span>
+            <h1>Discover Products You'll <em>Love</em></h1>
+            <p>Handpicked essentials across electronics, fashion, home &amp; more — all in one vibrant marketplace.</p>
+            <a href="#products" class="btn btn-primary btn-lg">Browse Collection</a>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card hero-card-1">
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop" alt="Featured product">
+            </div>
+            <div class="hero-card hero-card-2">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop" alt="Featured product">
+            </div>
+            <div class="hero-card hero-card-3">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop" alt="Featured product">
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if featured %}
+<section class="featured-section">
+    <div class="container">
+        <h2 class="section-title">Featured Picks</h2>
+        <div class="featured-grid">
+            {% for product in featured %}
+            <a href="{% url 'store:product_detail' product.slug %}" class="featured-card">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                <div class="featured-info">
+                    <span class="category-tag">{{ product.category.name }}</span>
+                    <h3>{{ product.name }}</h3>
+                    <span class="price">${{ product.price }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="shop-section" id="products">
+    <div class="container">
+        <div class="shop-header">
+            <h2 class="section-title">All Products</h2>
+            <div class="category-filters">
+                <a href="{% url 'store:product_list' %}" class="filter-chip {% if not active_category %}active{% endif %}">All</a>
+                {% for cat in categories %}
+                <a href="?category={{ cat.slug }}" class="filter-chip {% if active_category == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <article class="product-card">
+                <a href="{% url 'store:product_detail' product.slug %}" class="product-image-link">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+                    {% if product.featured %}<span class="badge badge-featured">Featured</span>{% endif %}
+                    {% if product.stock < 5 and product.stock > 0 %}<span class="badge badge-low">Low Stock</span>{% endif %}
+                </a>
+                <div class="product-body">
+                    <span class="category-tag">{{ product.category.name }}</span>
+                    <h3><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h3>
+                    <p class="product-desc">{{ product.description|truncatewords:12 }}</p>
+                    <div class="product-footer">
+                        <span class="price">${{ product.price }}</span>
+                        <form action="{% url 'store:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <input type="hidden" name="next" value="{% url 'store:product_list' %}">
+                            <button type="submit" class="btn btn-accent btn-sm" {% if product.stock == 0 %}disabled{% endif %}>
+                                {% if product.stock == 0 %}Out of Stock{% else %}Add to Cart{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No products found. Try a different search or category.</p>
+            <a href="{% url 'store:product_list' %}" class="btn btn-primary">View All Products</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

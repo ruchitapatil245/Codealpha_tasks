@@ -1,0 +1,100 @@
+{% extends 'store/base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<section class="product-detail-section">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{% url 'store:product_list' %}">Shop</a>
+            <span>/</span>
+            <a href="?category={{ product.category.slug }}">{{ product.category.name }}</a>
+            <span>/</span>
+            <span>{{ product.name }}</span>
+        </nav>
+
+        <div class="product-detail-grid">
+            <div class="product-gallery">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="main-image">
+            </div>
+
+            <div class="product-info">
+                <span class="category-tag">{{ product.category.name }}</span>
+                <h1>{{ product.name }}</h1>
+                <p class="detail-price">${{ product.price }}</p>
+
+                <div class="stock-status {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                    {% if product.stock > 0 %}
+                        ✓ In Stock ({{ product.stock }} available)
+                    {% else %}
+                        ✗ Out of Stock
+                    {% endif %}
+                </div>
+
+                <p class="product-full-desc">{{ product.description }}</p>
+
+                {% if product.stock > 0 %}
+                <form action="{% url 'store:cart_add' product.id %}" method="post" class="detail-add-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'store:product_detail' product.slug %}">
+                    <div class="quantity-selector">
+                        <label for="quantity">Quantity</label>
+                        <div class="qty-controls">
+                            <button type="button" class="qty-btn" data-action="decrease">−</button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}">
+                            <button type="button" class="qty-btn" data-action="increase">+</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Add to Cart</button>
+                </form>
+                {% endif %}
+
+                <div class="detail-meta">
+                    <div class="meta-item">
+                        <strong>Category</strong>
+                        <span>{{ product.category.name }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <strong>SKU</strong>
+                        <span>#{{ product.id|stringformat:"04d" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if related_products %}
+        <section class="related-section">
+            <h2 class="section-title">You May Also Like</h2>
+            <div class="product-grid product-grid-sm">
+                {% for related in related_products %}
+                <article class="product-card">
+                    <a href="{% url 'store:product_detail' related.slug %}" class="product-image-link">
+                        <img src="{{ related.image_url }}" alt="{{ related.name }}" loading="lazy">
+                    </a>
+                    <div class="product-body">
+                        <h3><a href="{% url 'store:product_detail' related.slug %}">{{ related.name }}</a></h3>
+                        <span class="price">${{ related.price }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.max);
+        let val = parseInt(input.value) || 1;
+        if (btn.dataset.action === 'increase' && val < max) val++;
+        if (btn.dataset.action === 'decrease' && val > 1) val--;
+        input.value = val;
+    });
+});
+</script>
+{% endblock %}

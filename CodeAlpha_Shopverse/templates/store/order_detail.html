@@ -1,0 +1,56 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="order-success-banner">
+            <span class="success-icon">✓</span>
+            <h1>Order Confirmed!</h1>
+            <p>Thank you for your purchase. Your order <strong>#{{ order.id }}</strong> has been placed.</p>
+        </div>
+
+        <div class="order-detail-grid">
+            <div class="order-card">
+                <h2>Order Details</h2>
+                <div class="order-meta">
+                    <p><strong>Order ID:</strong> #{{ order.id }}</p>
+                    <p><strong>Date:</strong> {{ order.created_at|date:"F j, Y, g:i a" }}</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></p>
+                    <p><strong>Total:</strong> ${{ order.total }}</p>
+                </div>
+            </div>
+
+            <div class="order-card">
+                <h2>Shipping Address</h2>
+                <address>
+                    {{ order.shipping_name }}<br>
+                    {{ order.shipping_address }}<br>
+                    {{ order.shipping_city }}, {{ order.shipping_zip }}<br>
+                    {{ order.shipping_email }}
+                </address>
+            </div>
+        </div>
+
+        <div class="order-items-card">
+            <h2>Items Ordered</h2>
+            {% for item in order.items.all %}
+            <div class="order-item-row">
+                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                <div>
+                    <h3>{{ item.product.name }}</h3>
+                    <span class="text-muted">Qty: {{ item.quantity }} × ${{ item.price }}</span>
+                </div>
+                <span class="price">${{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="order-actions">
+            <a href="{% url 'store:order_history' %}" class="btn btn-outline">View All Orders</a>
+            <a href="{% url 'store:product_list' %}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

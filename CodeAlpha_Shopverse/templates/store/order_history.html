@@ -1,0 +1,46 @@
+{% extends 'store/base.html' %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <h1 class="page-title">My Orders</h1>
+
+        {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+            <article class="order-card order-list-item">
+                <div class="order-list-header">
+                    <div>
+                        <h3>Order #{{ order.id }}</h3>
+                        <span class="text-muted">{{ order.created_at|date:"F j, Y" }}</span>
+                    </div>
+                    <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="order-list-items">
+                    {% for item in order.items.all %}
+                    <div class="order-mini-item">
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                        <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-list-footer">
+                    <span class="price">Total: ${{ order.total }}</span>
+                    <a href="{% url 'store:order_detail' order.id %}" class="btn btn-outline btn-sm">View Details</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h2>No orders yet</h2>
+            <p>When you place an order, it will appear here.</p>
+            <a href="{% url 'store:product_list' %}" class="btn btn-primary">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

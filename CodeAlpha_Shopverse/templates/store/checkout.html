@@ -1,0 +1,48 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <h1 class="page-title">Checkout</h1>
+
+        <div class="checkout-layout">
+            <form method="post" class="checkout-form">
+                {% csrf_token %}
+                <h2>Shipping Information</h2>
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <span class="field-error">{{ field.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
+            </form>
+
+            <aside class="cart-summary">
+                <h2>Order Summary</h2>
+                {% for item in cart %}
+                <div class="summary-item">
+                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                    <div>
+                        <p>{{ item.product.name }}</p>
+                        <span class="text-muted">Qty: {{ item.quantity }}</span>
+                    </div>
+                    <span>${{ item.subtotal }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span>${{ cart.total }}</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+{% endblock %}
